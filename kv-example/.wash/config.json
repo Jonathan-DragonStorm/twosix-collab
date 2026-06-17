@@ -1,0 +1,6 @@
+{
+  "build": {
+    "command": "tinygo build -target=./component.json -scheduler=asyncify -gc=conservative -o kv-example.wasm .",
+    "artifact_path": "kv-example.wasm"
+  }
+}

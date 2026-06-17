@@ -1,0 +1,49 @@
+# =============================================================================
+# Stage 2 — cosmonic-control-hostgroup — <system-name>-dev
+# =============================================================================
+#
+# The hostgroup chart has NO cluster-scoped resources — it is entirely Stage 2.
+# Install after cosmonic-control is running in <system-name>-dev.
+#
+# Command:
+#   helm install cosmonic-control-hostgroup ./cosmonic-control-hostgroup \
+#     --namespace <system-name>-dev \
+#     -f values-stage2-hostgroup-dev.yaml
+#
+# Upgrade (subsequent runs):
+#   helm upgrade cosmonic-control-hostgroup ./cosmonic-control-hostgroup \
+#     --namespace <system-name>-dev \
+#     -f values-stage2-hostgroup-dev.yaml
+#
+# Note: --skip-crds is not needed here because the hostgroup chart has no crds/
+# directory at all.
+#
+# =============================================================================
+
+# Unique hostgroup name — used in scheduling decisions.
+# Use a distinct value per namespace to avoid cross-namespace scheduling.
+hostgroup: cosmonic-dev
+
+# Must match the namespace where cosmonic-control is installed.
+# This tells the hostgroup pods where to find the nexus (NATS) and
+# OpenTelemetry collector services.
+controlNamespace: <system-name>-dev
+
+replicaCount: 1
+
+# -----------------------------------------------------------------------------
+# Private registry (uncomment and fill in if using a mirror)
+# -----------------------------------------------------------------------------
+# image:
+#   registry: "<your-registry>:443/ghcr.io"
+#   pullSecrets:
+#     - name: "<your-pull-secret>"
+
+# -----------------------------------------------------------------------------
+# CA bundle (uncomment if host pods must trust a private OCI registry)
+# -----------------------------------------------------------------------------
+# caBundle:
+#   enabled: true
+#   existingConfigMap: "cosmonic-ca-bundle"
+#   configMapKey: "ca-certificates.crt"
+#   mountPath: "/etc/ssl/certs/ca-certificates.crt"

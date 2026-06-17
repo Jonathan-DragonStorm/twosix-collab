@@ -1,0 +1,41 @@
+# =============================================================================
+# Stage 2 — cosmonic-control-hostgroup — <system-name>-test
+# =============================================================================
+#
+# The hostgroup chart has NO cluster-scoped resources — it is entirely Stage 2.
+# Install after cosmonic-control is running in <system-name>-test.
+#
+# Command:
+#   helm install cosmonic-control-hostgroup ./cosmonic-control-hostgroup \
+#     --namespace <system-name>-test \
+#     -f values-stage2-hostgroup-test.yaml
+#
+# Upgrade (subsequent runs):
+#   helm upgrade cosmonic-control-hostgroup ./cosmonic-control-hostgroup \
+#     --namespace <system-name>-test \
+#     -f values-stage2-hostgroup-test.yaml
+#
+# =============================================================================
+
+hostgroup: cosmonic-test
+
+controlNamespace: <system-name>-test
+
+replicaCount: 1
+
+# -----------------------------------------------------------------------------
+# Private registry (uncomment and fill in if using a mirror)
+# -----------------------------------------------------------------------------
+# image:
+#   registry: "<your-registry>:443/ghcr.io"
+#   pullSecrets:
+#     - name: "<your-pull-secret>"
+
+# -----------------------------------------------------------------------------
+# CA bundle (uncomment if host pods must trust a private OCI registry)
+# -----------------------------------------------------------------------------
+# caBundle:
+#   enabled: true
+#   existingConfigMap: "cosmonic-ca-bundle"
+#   configMapKey: "ca-certificates.crt"
+#   mountPath: "/etc/ssl/certs/ca-certificates.crt"

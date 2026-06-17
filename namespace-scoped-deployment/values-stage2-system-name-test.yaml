@@ -1,0 +1,86 @@
+# =============================================================================
+# Stage 2 — cosmonic-control — <system-name>-test
+# =============================================================================
+#
+# Run by a user with namespace-level permissions only.
+# Prerequisites:
+#   * Stage 1 CRDs must already be applied to the cluster (kubectl apply -f crds/)
+#   * The <system-name>-test namespace must already exist
+#   * cosmonic-prerequisites must already be installed in the namespace
+#
+# Command:
+#   helm install cosmonic-control ./cosmonic-control \
+#     --namespace <system-name>-test \
+#     --skip-crds \
+#     -f values-stage2-<system-name>-test.yaml
+#
+# Upgrade (subsequent runs):
+#   helm upgrade cosmonic-control ./cosmonic-control \
+#     --namespace <system-name>-test \
+#     --skip-crds \
+#     -f values-stage2-<system-name>-test.yaml
+#
+# Verify:
+#   helm status cosmonic-control -n <system-name>-test
+#   kubectl get pods -n <system-name>-test
+#
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# RBAC — namespace-scoped (the key flag for this deployment model)
+# -----------------------------------------------------------------------------
+rbac:
+  create: true
+  clusterMode: false
+
+serviceAccount:
+  create: true
+  automountServiceAccountToken: true
+  annotations: {}
+
+metrics:
+  secure: false
+  port: 8081
+
+# -----------------------------------------------------------------------------
+# Operator — scoped to this namespace only
+# -----------------------------------------------------------------------------
+operator:
+  watchNamespaces:
+    - <system-name>-test
+  hostNamespaces:
+    - <system-name>-test
+  allowSharedHosts: true
+  caBundleEnabled: false
+
+# -----------------------------------------------------------------------------
+# Ingress — disabled
+# -----------------------------------------------------------------------------
+ingress:
+  enabled: false
+
+# -----------------------------------------------------------------------------
+# License and console hostname
+# -----------------------------------------------------------------------------
+cosmonicLicenseKey: ""
+hostName: "http://localhost:8080"
+
+# -----------------------------------------------------------------------------
+# Private registry (uncomment and fill in if using a mirror)
+# -----------------------------------------------------------------------------
+# global:
+#   image:
+#     registry: "<your-registry>:443/ghcr.io"
+#     pullSecrets:
+#       - name: "<your-pull-secret>"
+
+# -----------------------------------------------------------------------------
+# CA bundle (uncomment if the operator must trust a private CA)
+# -----------------------------------------------------------------------------
+# caBundle:
+#   existingConfigMap: "cosmonic-ca-bundle"
+#   configMapKey: "ca-certificates.crt"
+#   mountPath: "/etc/ssl/certs/ca-certificates.crt"
+#
+# operator:
+#   caBundleEnabled: true

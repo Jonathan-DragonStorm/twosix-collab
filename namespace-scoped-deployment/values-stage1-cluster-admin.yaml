@@ -1,0 +1,54 @@
+# =============================================================================
+# Stage 1 — Cluster Admin
+# =============================================================================
+#
+# This file is a REFERENCE DOCUMENT, not a values file passed to helm.
+#
+# The only cluster-scoped resources required are the 7 CRDs bundled in the
+# chart's crds/ directory:
+#
+#   control.cosmonic.io_httptriggers.yaml
+#   control.cosmonic.io_projectenvironments.yaml
+#   runtime.wasmcloud.dev_artifacts.yaml
+#   runtime.wasmcloud.dev_hosts.yaml
+#   runtime.wasmcloud.dev_workloads.yaml
+#   runtime.wasmcloud.dev_workloaddeployments.yaml
+#   runtime.wasmcloud.dev_workloadreplicasets.yaml
+#
+# With rbac.clusterMode=false (set in Stage 2) and metrics.secure=false
+# (default), the chart creates ZERO ClusterRoles or ClusterRoleBindings.
+# All RBAC is namespace-scoped and is handled entirely in Stage 2.
+#
+# NOTE — Traefik CRDs:
+# The stock chart also ships Traefik CRDs in templates/traefik/crds.yaml.
+# These are rendered when ingress.enabled=true and ingress.provider=traefik.
+# Stage 2 sets ingress.enabled=false to prevent the namespace user from
+# attempting to apply cluster-scoped resources. IngressRoutes are managed
+# separately via the modified templates in cosmonic-control-namespace-scoped/.
+# If a future deployment needs the stock Traefik templates, apply them here:
+#
+#   helm template cosmonic-control ./cosmonic-control \
+#     --set ingress.enabled=true \
+#     --set ingress.provider=traefik \
+#     --show-only templates/traefik/crds.yaml \
+#     | kubectl apply -f -
+#
+# =============================================================================
+# STAGE 1 COMMAND (run once per cluster, not per namespace)
+# =============================================================================
+#
+#   kubectl apply -f ./cosmonic-control/crds/
+#
+# Verify:
+#   kubectl get crds | grep -E '(wasmcloud\.dev|cosmonic\.io)'
+#
+# Expected output (7 CRDs):
+#   artifacts.runtime.wasmcloud.dev
+#   hosts.runtime.wasmcloud.dev
+#   httptriggers.control.cosmonic.io
+#   projectenvironments.control.cosmonic.io
+#   workloaddeployments.runtime.wasmcloud.dev
+#   workloadreplicasets.runtime.wasmcloud.dev
+#   workloads.runtime.wasmcloud.dev
+#
+# Once confirmed, proceed to Stage 2 for each target namespace.

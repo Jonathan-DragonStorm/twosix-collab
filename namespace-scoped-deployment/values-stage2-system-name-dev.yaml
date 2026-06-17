@@ -1,0 +1,100 @@
+# =============================================================================
+# Stage 2 — cosmonic-control — <system-name>-dev
+# =============================================================================
+#
+# Run by a user with namespace-level permissions only.
+# Prerequisites:
+#   * Stage 1 CRDs must already be applied to the cluster (kubectl apply -f crds/)
+#   * The <system-name>-dev namespace must already exist
+#   * cosmonic-prerequisites must already be installed in the namespace
+#
+# Command:
+#   helm install cosmonic-control ./cosmonic-control \
+#     --namespace <system-name>-dev \
+#     --skip-crds \
+#     -f values-stage2-<system-name>-dev.yaml
+#
+# Upgrade (subsequent runs):
+#   helm upgrade cosmonic-control ./cosmonic-control \
+#     --namespace <system-name>-dev \
+#     --skip-crds \
+#     -f values-stage2-<system-name>-dev.yaml
+#
+# Verify:
+#   helm status cosmonic-control -n <system-name>-dev
+#   kubectl get pods -n <system-name>-dev
+#
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# RBAC — namespace-scoped (the key flag for this deployment model)
+# -----------------------------------------------------------------------------
+# clusterMode: false switches every Role from ClusterRole to namespaced Role.
+# Combined with metrics.secure: false (below), the chart creates ZERO
+# ClusterRoles or ClusterRoleBindings — everything is scoped to this namespace
+# (and to watchNamespaces / hostNamespaces for tenant/host RBAC).
+rbac:
+  create: true
+  clusterMode: false
+
+serviceAccount:
+  create: true
+  automountServiceAccountToken: true
+  annotations: {}
+
+metrics:
+  secure: false   # default, but explicit — keeps metrics RBAC namespace-safe
+  port: 8081
+
+# -----------------------------------------------------------------------------
+# Operator — scoped to this namespace only
+# -----------------------------------------------------------------------------
+# watchNamespaces: the operator only reconciles Workload/HTTPTrigger resources
+#   in these namespaces (instead of cluster-wide). The chart creates a
+#   namespaced Role/RoleBinding for each listed namespace.
+# hostNamespaces: namespaces where host Pods may run. The chart creates a
+#   host-finalizer Role/RoleBinding in each listed namespace.
+operator:
+  watchNamespaces:
+    - <system-name>-dev
+  hostNamespaces:
+    - <system-name>-dev
+  allowSharedHosts: true
+  caBundleEnabled: false  # set to true and configure caBundle below if needed
+
+# -----------------------------------------------------------------------------
+# Ingress — disabled
+# -----------------------------------------------------------------------------
+# ingress.enabled: false prevents templates/traefik/crds.yaml from being
+# rendered. Those CRDs are cluster-scoped resources; the namespace user cannot
+# apply them. The provider manages Traefik; IngressRoutes for cosmonic-control
+# are managed separately via the modified templates in
+# cosmonic-control-namespace-scoped/.
+ingress:
+  enabled: false
+
+# -----------------------------------------------------------------------------
+# License and console hostname
+# -----------------------------------------------------------------------------
+cosmonicLicenseKey: ""       # required — set via --set or --set-file
+hostName: "http://localhost:8080"  # update to the actual console hostname
+
+# -----------------------------------------------------------------------------
+# Private registry (uncomment and fill in if using a mirror)
+# -----------------------------------------------------------------------------
+# global:
+#   image:
+#     registry: "<your-registry>:443/ghcr.io"
+#     pullSecrets:
+#       - name: "<your-pull-secret>"
+
+# -----------------------------------------------------------------------------
+# CA bundle (uncomment if the operator must trust a private CA)
+# -----------------------------------------------------------------------------
+# caBundle:
+#   existingConfigMap: "cosmonic-ca-bundle"   # or use contents / existingSecret
+#   configMapKey: "ca-certificates.crt"
+#   mountPath: "/etc/ssl/certs/ca-certificates.crt"
+#
+# operator:
+#   caBundleEnabled: true
