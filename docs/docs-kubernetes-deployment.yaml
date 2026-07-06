@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cosmonic-docs
+  namespace: cosmonic-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cosmonic-docs
+  template:
+    metadata:
+      labels:
+        app: cosmonic-docs
+    spec:
+      imagePullSecrets:
+        - name: registry-credentials
+      containers:
+        - name: nginx
+          image: my-registry.corp.com/cosmonic/docs:0.6.1
+          ports:
+            - containerPort: 80
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cosmonic-docs
+  namespace: cosmonic-system
+spec:
+  selector:
+    app: cosmonic-docs
+  ports:
+    - port: 80
+      targetPort: 80
