@@ -54,7 +54,15 @@ Inspect and MCP-Inspector hand off to the Cosmonic Desktop app via its
 
 ## Installing
 
-- Command line: code --install-extension ./cosmonic-vscode-0.1.0.vsix
+The Bytecode Alliance WIT IDL highlighting is a dependency
+
+The from the command line:
+
+```
+code --install-extension ./wit-idl-0.3.34.vsix
+code --install-extension ./cosmonic-vscode-0.1.0.vsix
+```
+
 - VS Code UI: Extensions panel → ⋯ menu → "Install from VSIX…" → select the file
 
 Install from GitHub Repository (Once published)
