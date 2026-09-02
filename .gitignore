@@ -1,0 +1,3 @@
+# Reassembled air-gap payloads. Only the 50 MB .part_* chunks are committed;
+# these are rebuilt on the receiving side with `cat *.part_* > <file>`.
+*-airgap.tar.gz
