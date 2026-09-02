@@ -1,11 +1,6 @@
 # Instructions
 
-## Created with: 
-`zip -s 50m cosmonic-desktop-0.5.27-x64.tar.gz.zip cosmonic-desktop-0.5.27-x64.tar.gz`
-
-
-## To combine and extract:
-`zip -F archive.zip --out combined.zip`
-`unzip combined.zip`
-
-
+sha256sum cosmonic-desktop-0.5.27-x64.tar.gz > original.sha256
+split -b 50M cosmonic-desktop-0.5.27-x64.tar.gz cosmonic-desktop-0.5.27-x64.tar.gz.part_
+cat cosmonic-desktop-0.5.27-x64.tar.gz.part_* > cosmonic-desktop-0.5.27-x64.tar.gz
+sha256sum -c original.sha256
