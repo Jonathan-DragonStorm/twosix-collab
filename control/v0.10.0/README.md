@@ -138,10 +138,7 @@ kubectl port-forward -n cosmonic-system svc/cosmonic-docs 8080:80
 
 ---
 
-## Deviations from the vendor docs
-
-The published air-gapped guide does not work as written. Three problems, all
-already handled by the scripts in this bundle:
+## NOTES: Pending Updates to Upstream
 
 ### 1. Traefik's images bypass every registry override
 
@@ -175,7 +172,7 @@ Two alternatives, if you would rather not use a post-renderer:
 The docs say:
 
 ```bash
---set image.repository=${REGISTRY}/cosmonic/control-host   # WRONG
+--set image.repository=${REGISTRY}/cosmonic/control-host  
 ```
 
 The chart has a separate `image.registry` (defaulting to `ghcr.io`) that is
@@ -188,7 +185,7 @@ The correct form, used by `02-install.sh`:
 --set "image.pullSecrets[0].name=registry-credentials"
 ```
 
-### 3. The docs image tag `0.10.0` does not exist
+### 3. The docs image tag `0.10.0` will be published shortly
 
 `ghcr.io/cosmonic/docs:0.10.0` returns `MANIFEST_UNKNOWN`. The published tags
 are `0.5.1`, `0.6.0`, `0.7.0` and `latest`; `0.7.0` and `latest` are the same
