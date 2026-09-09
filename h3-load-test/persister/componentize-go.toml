@@ -1,0 +1,2 @@
+worlds = ["h3:persister/persister@0.1.0"]
+wit_paths = ["wit"]

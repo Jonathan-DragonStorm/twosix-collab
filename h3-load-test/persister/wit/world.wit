@@ -1,0 +1,11 @@
+package h3:persister@0.1.0;
+
+world persister {
+  include wasi:cli/imports@0.2.8;
+
+  import wasi:logging/logging@0.1.0-draft;
+  import wasmcloud:nats/types@0.1.0;
+  import wasmcloud:nats/kv@0.1.0;
+
+  export h3:pipeline/persist@0.1.0;
+}

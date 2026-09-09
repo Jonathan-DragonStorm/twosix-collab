@@ -1,0 +1,2 @@
+worlds = ["h3:reader/reader@0.1.0"]
+wit_paths = ["wit"]

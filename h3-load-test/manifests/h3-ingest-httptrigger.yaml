@@ -1,0 +1,30 @@
+apiVersion: control.cosmonic.io/v1alpha1
+kind: HTTPTrigger
+metadata:
+  name: h3-ingest
+  namespace: twosix-dev
+spec:
+  replicas: 1
+  ingress:
+    host: h3-ingest.localhost.cosmonic.sh
+    paths:
+      - path: /
+        pathType: Prefix
+  template:
+    spec:
+      hostSelector:
+        hostgroup: h3
+      components:
+        - name: gateway
+          image: registry.twosix-dev.svc.cluster.local/library/h3-ingest-gateway:0.1.9
+          imagePullPolicy: IfNotPresent
+        - name: ingester
+          image: registry.twosix-dev.svc.cluster.local/library/h3-ingester:0.1.5
+          imagePullPolicy: IfNotPresent
+      hostInterfaces:
+        - namespace: wasmcloud
+          package: nats
+          version: "0.1.0"
+          interfaces: [types, kv, core-handler]
+          config:
+            core-subscriptions: "h3.ingest.raw"

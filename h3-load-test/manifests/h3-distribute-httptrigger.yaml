@@ -1,0 +1,28 @@
+apiVersion: control.cosmonic.io/v1alpha1
+kind: HTTPTrigger
+metadata:
+  name: h3-distribute
+  namespace: twosix-dev
+spec:
+  replicas: 1
+  ingress:
+    host: h3-distribute.localhost.cosmonic.sh
+    paths:
+      - path: /
+        pathType: Prefix
+  template:
+    spec:
+      hostSelector:
+        hostgroup: h3
+      components:
+        - name: gateway
+          image: registry.twosix-dev.svc.cluster.local/library/h3-distribute-gateway:0.1.3
+          imagePullPolicy: IfNotPresent
+        - name: reader
+          image: registry.twosix-dev.svc.cluster.local/library/h3-reader:0.1.0
+          imagePullPolicy: IfNotPresent
+      hostInterfaces:
+        - namespace: wasmcloud
+          package: nats
+          version: "0.1.0"
+          interfaces: [types, kv]

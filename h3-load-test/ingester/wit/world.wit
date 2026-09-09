@@ -1,0 +1,16 @@
+package h3:ingester@0.1.0;
+
+// Merged ingester+persister (single hop from gateway, matching h3-distribute's
+// gateway->reader shape) -- test for whether the double custom-interface hop
+// (gateway->ingester->persister) was the cause of the wasmcloud:nats/kv
+// linking failure, independent of the h3:pipeline/persist fix already found.
+world ingester {
+  include wasi:cli/imports@0.2.8;
+
+  import wasi:logging/logging@0.1.0-draft;
+  import wasmcloud:nats/types@0.1.0;
+  import wasmcloud:nats/kv@0.1.0;
+
+  export h3:pipeline/ingest@0.1.0;
+  export wasmcloud:nats/core-handler@0.1.0;
+}
