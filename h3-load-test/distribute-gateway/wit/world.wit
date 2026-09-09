@@ -1,0 +1,7 @@
+package h3:distribute-gateway@0.1.0;
+
+world gateway {
+  include wasmcloud:component-go/wasip3@0.2.0;
+
+  import h3:pipeline/query@0.1.0;
+}

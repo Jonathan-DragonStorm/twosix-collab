@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: h3-native-distributor
+  namespace: twosix-dev
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: h3-native-distributor}
+  template:
+    metadata:
+      labels: {app: h3-native-distributor}
+    spec:
+      containers:
+        - name: distributor
+          image: h3-native-distributor:0.1.0
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: NATS_URL
+              value: "nats://nats.twosix-dev.svc.cluster.local:4222"
+            - name: NATS_CA_FILE
+              value: "/etc/ssl/certs/ca-certificates.crt"
+          ports:
+            - containerPort: 8080
+          volumeMounts:
+            - name: ca-bundle
+              mountPath: /etc/ssl/certs/ca-certificates.crt
+              subPath: ca-certificates.crt
+              readOnly: true
+      volumes:
+        - name: ca-bundle
+          configMap:
+            name: host-ca-bundle
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: h3-native-distributor
+  namespace: twosix-dev
+spec:
+  selector: {app: h3-native-distributor}
+  ports:
+    - port: 8080
+      targetPort: 8080

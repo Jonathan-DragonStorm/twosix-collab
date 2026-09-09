@@ -1,0 +1,9 @@
+package h3:ingest-gateway@0.1.0;
+
+// Single-hop test: no h3:pipeline/persist import needed now, since the
+// merged ingester component (no separate persister) is the only downstream.
+world gateway {
+  include wasmcloud:component-go/wasip3@0.2.0;
+
+  import h3:pipeline/ingest@0.1.0;
+}

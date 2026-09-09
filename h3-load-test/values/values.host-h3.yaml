@@ -1,0 +1,29 @@
+controlNamespace: twosix-dev
+hostgroup: h3
+
+# Auth disabled to match the nats release (see nats-validate/values/values.nats.yaml).
+dataNats:
+  url: "nats://nats.twosix-dev.svc.cluster.local:4222"
+
+hostPlugins:
+  - id: wasmcloud-nats
+    config:
+      subject-allow: "h3.ingest.raw"
+      bucket-allow: "h3-points"
+    workloadConfig: deny
+
+plugins:
+  http:
+    enabled: true
+    port: 9191
+    tls:
+      enabled: false
+      hostname: "internal.cosmonic.sh"
+      certMountPath: /etc/tls
+
+gpu: false
+wasip3: true
+
+caBundle:
+  enabled: true
+  existingConfigMap: host-ca-bundle
