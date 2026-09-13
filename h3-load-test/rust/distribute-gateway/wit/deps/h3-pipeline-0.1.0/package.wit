@@ -1,0 +1,33 @@
+package h3:pipeline@0.1.0;
+
+interface types {
+  record data-point {
+    h3-index: string,
+    timestamp: string,
+    value: f64,
+  }
+}
+
+interface ingest {
+  use types.{data-point};
+  ingest-batch: async func(points: list<data-point>) -> result<u32, string>;
+  delete-by-key: async func(h3-index: string, timestamp: string) -> result<_, string>;
+  delete-by-time: async func(timestamp: string) -> result<u32, string>;
+  delete-all: async func() -> result<u32, string>;
+}
+
+interface persist {
+  use types.{data-point};
+  persist-batch: async func(points: list<data-point>) -> result<u32, string>;
+}
+
+interface query {
+  use types.{data-point};
+  get-by-key: async func(h3-index: string, timestamp: string) -> result<data-point, string>;
+  /// Every point at `timestamp`, streamed as the JSON document
+  /// `{"points":[...],"count":N,"elapsedMs":MS}` while the points are read.
+  ///
+  /// Errors found before streaming starts are returned as `err`. An error
+  /// while streaming ends the stream early, leaving the document incomplete.
+  get-by-time: async func(timestamp: string) -> result<stream<u8>, string>;
+}

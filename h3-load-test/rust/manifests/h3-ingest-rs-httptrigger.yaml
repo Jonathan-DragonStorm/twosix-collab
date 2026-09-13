@@ -1,0 +1,39 @@
+apiVersion: control.cosmonic.io/v1alpha1
+kind: HTTPTrigger
+metadata:
+  name: h3-ingest-rs
+  namespace: twosix-dev
+spec:
+  replicas: 1
+  # Deleting ~40k points at once can exceed Envoy's 15s default.
+  timeout: "300s"
+  ingress:
+    host: h3-ingest-rs.localhost.cosmonic.sh
+    paths:
+      - path: /
+        pathType: Prefix
+  template:
+    spec:
+      hostSelector:
+        hostgroup: h3
+      components:
+        - name: gateway
+          image: registry.twosix-dev.svc.cluster.local/library/h3-ingest-gateway-rs:0.1.0
+          imagePullPolicy: IfNotPresent
+          poolSize: 4
+          maxConcurrency: 4
+        - name: ingester
+          image: registry.twosix-dev.svc.cluster.local/library/h3-ingester-rs:0.1.0
+          imagePullPolicy: IfNotPresent
+          poolSize: 4
+          maxConcurrency: 4
+      hostInterfaces:
+        - namespace: wasmcloud
+          package: nats
+          version: "0.1.0"
+          interfaces: [types, kv, core-handler]
+          config:
+            # Same subject as the Go ingester (the only one values.host-h3.yaml
+            # grants). With both deployed, each message is written twice to
+            # the same key with the same value, which is harmless.
+            core-subscriptions: "h3.ingest.raw"
