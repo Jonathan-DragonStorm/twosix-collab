@@ -1,0 +1,9 @@
+package h3:ingester-rs@0.1.0;
+
+world ingester {
+  import wasmcloud:nats/types@0.1.0;
+  import wasmcloud:nats/kv@0.1.0;
+
+  export h3:pipeline/ingest@0.1.0;
+  export wasmcloud:nats/core-handler@0.1.0;
+}
