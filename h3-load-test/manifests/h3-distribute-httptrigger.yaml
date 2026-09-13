@@ -5,6 +5,8 @@ metadata:
   namespace: twosix-dev
 spec:
   replicas: 1
+  # A ~40k-point bulk scan can exceed Envoy's 15s default.
+  timeout: "300s"
   ingress:
     host: h3-distribute.localhost.cosmonic.sh
     paths:
@@ -18,9 +20,13 @@ spec:
         - name: gateway
           image: registry.twosix-dev.svc.cluster.local/library/h3-distribute-gateway:0.1.3
           imagePullPolicy: IfNotPresent
+          poolSize: 4
+          maxConcurrency: 4
         - name: reader
           image: registry.twosix-dev.svc.cluster.local/library/h3-reader:0.1.0
           imagePullPolicy: IfNotPresent
+          poolSize: 4
+          maxConcurrency: 4
       hostInterfaces:
         - namespace: wasmcloud
           package: nats
