@@ -2,10 +2,7 @@ module h3distgw
 
 go 1.25
 
-require (
-	go.bytecodealliance.org/pkg v0.2.4-0.20260806154504-91f6c4863e67
-	go.wasmcloud.dev/component v0.1.5
-)
+require go.bytecodealliance.org/pkg v0.2.4-0.20260806154504-91f6c4863e67
 
 require (
 	github.com/apparentlymart/go-userdirs v0.0.0-20200915174352-b0c018a67c13 // indirect
@@ -15,3 +12,5 @@ require (
 )
 
 tool github.com/bytecodealliance/componentize-go
+
+replace go.bytecodealliance.org/pkg => github.com/ricochet/go-pkg v0.0.0-20260912232709-554621915cd4

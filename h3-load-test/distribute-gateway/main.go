@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -12,23 +11,12 @@ import (
 	"h3distgw/h3_pipeline_query"
 )
 
-// maxResponseBodyBytes is a conservative margin under the ~1MiB
-// (1,048,576 byte) response-body cap confirmed this session on the
-// wasmCloud host's wasi:http outgoing-body stream (verified: not Envoy,
-// not our own SDK's response writer -- which genuinely streams via a real
-// wasi:http v0.3 StreamWriter, no internal buffering -- and not
-// configurable via any control-host flag, per `control-host --help`).
+// writeJSON encodes data to a buffer first, so an encoding error never
+// leaves a partially written response.
 //
-// Encoding into memory first and checking the length here means a
-// too-large response gets one clean, small, parseable JSON error instead
-// of the host silently truncating a large body mid-object -- which
-// previously surfaced as an "Unterminated string" JSON parse failure on
-// the client with no indication anything had gone wrong.
-const maxResponseBodyBytes = 1_000_000
-
-// writeJSON encodes data to a buffer first (never partially written on
-// error), and refuses to write a response likely to hit the host's body
-// cap, returning a clear error instead of letting it truncate silently.
+// There is no response size cap: the ~1MiB truncation previously seen here
+// was the response writer ignoring short stream writes, fixed in
+// go.bytecodealliance.org/pkg by "call WriteAll for stream write".
 func writeJSON(w http.ResponseWriter, status int, data any) {
 	body, err := json.Marshal(data)
 	if err != nil {
@@ -36,25 +24,11 @@ func writeJSON(w http.ResponseWriter, status int, data any) {
 		json.NewEncoder(w).Encode(map[string]any{"error": "encode response: " + err.Error()})
 		return
 	}
-	if len(body) > maxResponseBodyBytes {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]any{
-			"error": fmt.Sprintf(
-				"response too large: %d bytes exceeds this host's ~1MiB response-body limit "+
-					"(confirmed non-configurable in Cosmonic Control 0.10.0); narrow the query "+
-					"(e.g. a finer time bucket) or use by-key lookups instead of the bulk scan",
-				len(body)),
-		})
-		return
-	}
 	w.WriteHeader(status)
 	if _, err := w.Write(body); err != nil {
 		// Headers/status are already sent at this point -- nothing more we
-		// can tell the client -- but this is exactly the failure mode that
-		// was previously silent. Logging here would need a wasi:logging
-		// import this component doesn't currently have; the size guard
-		// above is what actually prevents this path from firing in
-		// practice for anything under the cap.
+		// can tell the client. Logging here would need a wasi:logging
+		// import this component doesn't currently have.
 		_ = err
 	}
 }

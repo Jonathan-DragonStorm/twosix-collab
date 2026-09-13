@@ -15,3 +15,5 @@ require (
 )
 
 tool github.com/bytecodealliance/componentize-go
+
+replace go.bytecodealliance.org/pkg => github.com/ricochet/go-pkg v0.0.0-20260912232709-554621915cd4
