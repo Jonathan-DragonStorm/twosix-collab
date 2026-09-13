@@ -17,11 +17,11 @@
 //     wasi:cli@0.3.0
 //     wasi:http@0.3.0
 //     bytecodealliance:pkg@0.1.0
-//     wasmcloud:blobstore@0.1.0
 //     wasmcloud:secrets@2.1.0
 //     wasmcloud:keyvalue@0.2.0
 //     wasmcloud:messaging@0.3.0
 //     wasmcloud:postgres@0.2.0
+//     wasmcloud:blobstore@0.1.0
 //     wasmcloud:nats@0.1.0
 //     wasmcloud:component-go@0.2.0
 //     h3:pipeline@0.1.0
@@ -37,6 +37,44 @@ import (
 	"runtime"
 	"unsafe"
 )
+
+//go:wasmimport h3:pipeline/query@0.1.0 [stream-new-0]get-by-time
+func wasm_stream_new_u8() uint64
+
+//go:wasmimport h3:pipeline/query@0.1.0 [async-lower][stream-read-0]get-by-time
+func wasm_stream_read_u8(handle int32, item unsafe.Pointer, count uint32) uint32
+
+//go:wasmimport h3:pipeline/query@0.1.0 [async-lower][stream-write-0]get-by-time
+func wasm_stream_write_u8(handle int32, item unsafe.Pointer, count uint32) uint32
+
+//go:wasmimport h3:pipeline/query@0.1.0 [stream-drop-readable-0]get-by-time
+func wasm_stream_drop_readable_u8(handle int32)
+
+//go:wasmimport h3:pipeline/query@0.1.0 [stream-drop-writable-0]get-by-time
+func wasm_stream_drop_writable_u8(handle int32)
+
+var wasm_stream_vtable_u8 = witTypes.StreamVtable[uint8]{
+	1,
+	1,
+	wasm_stream_read_u8,
+	wasm_stream_write_u8,
+	nil,
+	nil,
+	wasm_stream_drop_readable_u8,
+	wasm_stream_drop_writable_u8,
+	nil,
+	nil,
+}
+
+func MakeStreamU8() (*witTypes.StreamWriter[uint8], *witTypes.StreamReader[uint8]) {
+	pair := wasm_stream_new_u8()
+	return witTypes.MakeStreamWriter[uint8](&wasm_stream_vtable_u8, int32(pair>>32)),
+		witTypes.MakeStreamReader[uint8](&wasm_stream_vtable_u8, int32(pair&0xFFFFFFFF))
+}
+
+func LiftStreamU8(handle int32) *witTypes.StreamReader[uint8] {
+	return witTypes.MakeStreamReader[uint8](&wasm_stream_vtable_u8, handle)
+}
 
 type DataPoint = h3_pipeline_types.DataPoint
 
@@ -76,7 +114,7 @@ func GetByKey(h3Index string, timestamp string) witTypes.Result[h3_pipeline_type
 //go:wasmimport h3:pipeline/query@0.1.0 [async-lower]get-by-time
 func wasm_import_get_by_time(arg0 uintptr, arg1 uint32, arg2 uintptr) int32
 
-func GetByTime(timestamp string) witTypes.Result[[]h3_pipeline_types.DataPoint, string] {
+func GetByTime(timestamp string) witTypes.Result[*witTypes.StreamReader[uint8], string] {
 	pinner := &runtime.Pinner{}
 	defer pinner.Unpin()
 
@@ -85,27 +123,19 @@ func GetByTime(timestamp string) witTypes.Result[[]h3_pipeline_types.DataPoint, 
 	pinner.Pin(utf8)
 
 	witAsync.SubtaskWait(uint32(wasm_import_get_by_time(uintptr(utf8), uint32(len(timestamp)), returnArea)))
-	var result2 witTypes.Result[[]h3_pipeline_types.DataPoint, string]
+	var result witTypes.Result[*witTypes.StreamReader[uint8], string]
 	switch uint8(*(*uint32)(unsafe.Add(unsafe.Pointer(returnArea), 0))) {
 	case 0:
-		result := make([]h3_pipeline_types.DataPoint, 0, *(*uint32)(unsafe.Add(unsafe.Pointer(returnArea), (2 * 4))))
-		for index := 0; index < int(*(*uint32)(unsafe.Add(unsafe.Pointer(returnArea), (2 * 4)))); index++ {
-			base := unsafe.Add(unsafe.Pointer(uintptr(*(*uint32)(unsafe.Add(unsafe.Pointer(returnArea), 4)))), index*(8+4*4))
-			value := unsafe.String((*uint8)(unsafe.Pointer(uintptr(*(*uint32)(unsafe.Add(unsafe.Pointer(base), 0))))), *(*uint32)(unsafe.Add(unsafe.Pointer(base), 4)))
-			value0 := unsafe.String((*uint8)(unsafe.Pointer(uintptr(*(*uint32)(unsafe.Add(unsafe.Pointer(base), (2 * 4)))))), *(*uint32)(unsafe.Add(unsafe.Pointer(base), (3 * 4))))
 
-			result = append(result, h3_pipeline_types.DataPoint{value, value0, *(*float64)(unsafe.Add(unsafe.Pointer(base), (4 * 4)))})
-		}
-
-		result2 = witTypes.Ok[[]h3_pipeline_types.DataPoint, string](result)
+		result = witTypes.Ok[*witTypes.StreamReader[uint8], string](LiftStreamU8(*(*int32)(unsafe.Add(unsafe.Pointer(returnArea), 4))))
 	case 1:
-		value1 := unsafe.String((*uint8)(unsafe.Pointer(uintptr(*(*uint32)(unsafe.Add(unsafe.Pointer(returnArea), 4))))), *(*uint32)(unsafe.Add(unsafe.Pointer(returnArea), (2 * 4))))
+		value := unsafe.String((*uint8)(unsafe.Pointer(uintptr(*(*uint32)(unsafe.Add(unsafe.Pointer(returnArea), 4))))), *(*uint32)(unsafe.Add(unsafe.Pointer(returnArea), (2 * 4))))
 
-		result2 = witTypes.Err[[]h3_pipeline_types.DataPoint, string](value1)
+		result = witTypes.Err[*witTypes.StreamReader[uint8], string](value)
 	default:
 		panic("unreachable")
 	}
 
-	return result2
+	return result
 
 }

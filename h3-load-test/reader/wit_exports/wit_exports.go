@@ -107,43 +107,27 @@ func wasm_export_h3_pipeline_query_get_by_time(arg0 uintptr, arg1 uint32) int32 
 		witRuntime.Unpin()
 		result := export_h3_pipeline_query.GetByTime(value)
 		var option int32
-		var option3 uintptr
-		var option4 uint32
+		var option0 uintptr
+		var option1 uint32
 		switch result.Tag() {
 		case witTypes.ResultOk:
 			payload := result.Ok()
-			slice := payload
-			length := uint32(len(slice))
-			result1 := witRuntime.Allocate(pinner, uintptr(length*(8+4*4)), 8)
-			for index, element := range slice {
-				base := unsafe.Add(result1, index*(8+4*4))
-				utf8 := unsafe.Pointer(unsafe.StringData((element).H3Index))
-				pinner.Pin(utf8)
-				*(*uint32)(unsafe.Add(unsafe.Pointer(base), 4)) = uint32(uint32(len((element).H3Index)))
-				*(*uint32)(unsafe.Add(unsafe.Pointer(base), 0)) = uint32(uintptr(uintptr(utf8)))
-				utf80 := unsafe.Pointer(unsafe.StringData((element).Timestamp))
-				pinner.Pin(utf80)
-				*(*uint32)(unsafe.Add(unsafe.Pointer(base), (3 * 4))) = uint32(uint32(len((element).Timestamp)))
-				*(*uint32)(unsafe.Add(unsafe.Pointer(base), (2 * 4))) = uint32(uintptr(uintptr(utf80)))
-				*(*float64)(unsafe.Add(unsafe.Pointer(base), (4 * 4))) = (element).Value
-
-			}
 
 			option = int32(0)
-			option3 = uintptr(result1)
-			option4 = length
+			option0 = uintptr((payload).TakeHandle())
+			option1 = 0
 		case witTypes.ResultErr:
 			payload := result.Err()
-			utf82 := unsafe.Pointer(unsafe.StringData(payload))
-			pinner.Pin(utf82)
+			utf8 := unsafe.Pointer(unsafe.StringData(payload))
+			pinner.Pin(utf8)
 
 			option = int32(1)
-			option3 = uintptr(utf82)
-			option4 = uint32(len(payload))
+			option0 = uintptr(utf8)
+			option1 = uint32(len(payload))
 		default:
 			panic("unreachable")
 		}
-		wasm_export_task_return_h3_pipeline_query_get_by_time(option, option3, option4)
+		wasm_export_task_return_h3_pipeline_query_get_by_time(option, option0, option1)
 
 	}))
 }

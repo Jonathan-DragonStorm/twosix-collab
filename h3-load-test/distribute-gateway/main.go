@@ -59,8 +59,10 @@ func byKeyHandler(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// byTimeHandler streams the reader's JSON document straight into the
+// response body as it is produced, rather than decoding and re-encoding
+// every point.
 func byTimeHandler(w http.ResponseWriter, r *http.Request) {
-	start := time.Now()
 	timestamp := strings.TrimSpace(r.URL.Query().Get("timestamp"))
 	if timestamp == "" {
 		http.Error(w, "missing required query param: timestamp", http.StatusBadRequest)
@@ -73,12 +75,21 @@ func byTimeHandler(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, http.StatusInternalServerError, map[string]any{"error": result.Err()})
 		return
 	}
-	points := result.Ok()
-	writeJSON(w, http.StatusOK, map[string]any{
-		"points":    points,
-		"count":     len(points),
-		"elapsedMs": time.Since(start).Milliseconds(),
-	})
+	body := result.Ok()
+	defer body.Drop()
+
+	w.WriteHeader(http.StatusOK)
+	buf := make([]byte, 64<<10)
+	for {
+		if n := body.Read(buf); n > 0 {
+			if _, err := w.Write(buf[:n]); err != nil {
+				return // client went away
+			}
+		}
+		if body.WriterDropped() {
+			return
+		}
+	}
 }
 
 const openapiSpec = `{

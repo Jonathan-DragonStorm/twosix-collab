@@ -24,5 +24,10 @@ interface persist {
 interface query {
   use types.{data-point};
   get-by-key: async func(h3-index: string, timestamp: string) -> result<data-point, string>;
-  get-by-time: async func(timestamp: string) -> result<list<data-point>, string>;
+  /// Every point at `timestamp`, streamed as the JSON document
+  /// `{"points":[...],"count":N,"elapsedMs":MS}` while the points are read.
+  ///
+  /// Errors found before streaming starts are returned as `err`. An error
+  /// while streaming ends the stream early, leaving the document incomplete.
+  get-by-time: async func(timestamp: string) -> result<stream<u8>, string>;
 }
