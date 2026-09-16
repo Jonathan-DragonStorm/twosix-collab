@@ -1,0 +1,12 @@
+[package]
+name = "h3-ingester"
+edition.workspace = true
+version.workspace = true
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+h3-common.workspace = true
+serde_json.workspace = true
+wit-bindgen.workspace = true

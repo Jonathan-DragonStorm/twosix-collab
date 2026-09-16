@@ -1,6 +1,6 @@
 # H3 load-test scripts
 
-Bash scripts for driving and timing bulk writes/reads against the H3 NATS KV
+Scripts for driving and timing bulk writes/reads against the H3 NATS KV
 load-test harness (`h3-ingest`, `h3-distribute`, and the native comparison
 distributor).
 
@@ -16,6 +16,13 @@ distributor).
   distributor, so the two are directly comparable.
 - `load-cleanup.sh TIMESTAMP | --all` — wraps the delete endpoints to clear
   test data between runs.
+- `bulk_load.py [-c CONCURRENCY] [-n REQUESTS] [--expect POINTS] TIMESTAMP...`
+  — concurrent bulk-scan load: runs `REQUESTS` `GET /points?timestamp=...`
+  calls round-robin over the timestamps with `CONCURRENCY` in flight, checks
+  every response is a 200 with a complete point set, and prints successes,
+  points/bytes returned, latency, and throughput. Python 3 standard library
+  only. Use this rather than backgrounding `curl` from bash for concurrent
+  runs.
 
 ## Example
 
@@ -27,6 +34,21 @@ kubectl -n twosix-dev port-forward svc/h3-native-distributor 18080:8080 &
 NATIVE_URL=http://127.0.0.1:18080 ./load-query.sh 2026.09.09.12.00 500
 ./load-cleanup.sh 2026.09.09.12.00
 ```
+
+Concurrent bulk scans, e.g. five timestamps each ingested at the generator's
+maximum of 41,846 points, 64 requests with 32 in flight:
+
+```bash
+for m in 00 01 02 03 04; do ./load-ingest.sh 41846 500 2026.09.13.00.$m; done
+./bulk_load.py -c 32 -n 64 --expect 41846 \
+  2026.09.13.00.00 2026.09.13.00.01 2026.09.13.00.02 2026.09.13.00.03 2026.09.13.00.04
+```
+
+Throughput under concurrency depends on the HTTPTrigger's `poolSize` ×
+`maxConcurrency` (warm instances × calls each may serve at once), set in
+`../manifests/`. Past that many requests in flight, calls queue. A bulk scan
+can also run past Envoy's default 15s upstream timeout, which the manifests
+raise via `spec.timeout`.
 
 ## Environment
 

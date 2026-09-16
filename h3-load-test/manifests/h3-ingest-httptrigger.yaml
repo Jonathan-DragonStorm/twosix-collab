@@ -5,6 +5,8 @@ metadata:
   namespace: twosix-dev
 spec:
   replicas: 1
+  # Deleting ~40k points at once can exceed Envoy's 15s default.
+  timeout: "300s"
   ingress:
     host: h3-ingest.localhost.cosmonic.sh
     paths:
@@ -18,9 +20,13 @@ spec:
         - name: gateway
           image: registry.twosix-dev.svc.cluster.local/library/h3-ingest-gateway:0.1.9
           imagePullPolicy: IfNotPresent
+          poolSize: 4
+          maxConcurrency: 4
         - name: ingester
           image: registry.twosix-dev.svc.cluster.local/library/h3-ingester:0.1.5
           imagePullPolicy: IfNotPresent
+          poolSize: 4
+          maxConcurrency: 4
       hostInterfaces:
         - namespace: wasmcloud
           package: nats

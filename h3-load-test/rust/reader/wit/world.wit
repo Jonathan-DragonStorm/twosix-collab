@@ -1,0 +1,8 @@
+package h3:reader-rs@0.1.0;
+
+world reader {
+  import wasmcloud:nats/types@0.1.0;
+  import wasmcloud:nats/kv@0.1.0;
+
+  export h3:pipeline/query@0.1.0;
+}
