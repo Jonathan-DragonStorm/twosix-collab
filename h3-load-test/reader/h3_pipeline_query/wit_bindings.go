@@ -30,7 +30,47 @@
 package h3_pipeline_query
 
 import (
+	witTypes "go.bytecodealliance.org/pkg/wit/types"
 	"h3reader/h3_pipeline_types"
+	"unsafe"
 )
 
 type DataPoint = h3_pipeline_types.DataPoint
+
+//go:wasmimport [export]h3:pipeline/query@0.1.0 [stream-new-0]get-by-time
+func wasm_stream_new_u8() uint64
+
+//go:wasmimport [export]h3:pipeline/query@0.1.0 [async-lower][stream-read-0]get-by-time
+func wasm_stream_read_u8(handle int32, item unsafe.Pointer, count uint32) uint32
+
+//go:wasmimport [export]h3:pipeline/query@0.1.0 [async-lower][stream-write-0]get-by-time
+func wasm_stream_write_u8(handle int32, item unsafe.Pointer, count uint32) uint32
+
+//go:wasmimport [export]h3:pipeline/query@0.1.0 [stream-drop-readable-0]get-by-time
+func wasm_stream_drop_readable_u8(handle int32)
+
+//go:wasmimport [export]h3:pipeline/query@0.1.0 [stream-drop-writable-0]get-by-time
+func wasm_stream_drop_writable_u8(handle int32)
+
+var wasm_stream_vtable_u8 = witTypes.StreamVtable[uint8]{
+	1,
+	1,
+	wasm_stream_read_u8,
+	wasm_stream_write_u8,
+	nil,
+	nil,
+	wasm_stream_drop_readable_u8,
+	wasm_stream_drop_writable_u8,
+	nil,
+	nil,
+}
+
+func MakeStreamU8() (*witTypes.StreamWriter[uint8], *witTypes.StreamReader[uint8]) {
+	pair := wasm_stream_new_u8()
+	return witTypes.MakeStreamWriter[uint8](&wasm_stream_vtable_u8, int32(pair>>32)),
+		witTypes.MakeStreamReader[uint8](&wasm_stream_vtable_u8, int32(pair&0xFFFFFFFF))
+}
+
+func LiftStreamU8(handle int32) *witTypes.StreamReader[uint8] {
+	return witTypes.MakeStreamReader[uint8](&wasm_stream_vtable_u8, handle)
+}

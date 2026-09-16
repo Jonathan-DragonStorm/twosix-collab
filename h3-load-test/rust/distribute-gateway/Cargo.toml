@@ -1,0 +1,11 @@
+[package]
+name = "h3-distribute-gateway"
+edition.workspace = true
+version.workspace = true
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+serde_json.workspace = true
+wit-bindgen.workspace = true

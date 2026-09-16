@@ -1,0 +1,14 @@
+[package]
+name = "h3-reader"
+edition.workspace = true
+version.workspace = true
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+futures.workspace = true
+h3-common.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+wit-bindgen.workspace = true

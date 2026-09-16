@@ -1,0 +1,22 @@
+[workspace]
+resolver = "3"
+members = ["h3-common", "reader", "distribute-gateway", "ingester", "ingest-gateway"]
+
+[workspace.package]
+edition = "2024"
+version = "0.1.0"
+
+[workspace.dependencies]
+futures = { version = "0.3", default-features = false, features = ["std", "async-await"] }
+h3-common = { path = "h3-common" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+# Same wit-bindgen release componentize-go v0.4.2 uses for the Go components,
+# so both implementations target the same component model async ABI.
+wit-bindgen = { version = "=0.61.1", features = ["async-spawn"] }
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+strip = true
