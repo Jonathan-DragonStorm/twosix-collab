@@ -17,6 +17,8 @@ genuinely disconnected cluster, and this bundle works around all three.
 | Payload | `cosmonic-control-0.10.0-airgap.tar.gz`, split into 50 MB parts |
 | Receiving host | RHEL 9 |
 
+> **Note:** the split payload parts are no longer stored in this repo. Obtain the bundle separately; the `.sha256` files here are kept for verification.
+
 > **Architecture:** images were mirrored for `linux/amd64` only. On an arm64
 > cluster every pod will fail with `exec format error`. See
 > [Rebuilding this bundle](#rebuilding-this-bundle) to remirror for `linux/arm64`.

@@ -1,3 +1,7 @@
-# Reassembled air-gap payloads. Only the 50 MB .part_* chunks are committed;
-# these are rebuilt on the receiving side with `cat *.part_* > <file>`.
+# Release payloads (and their split chunks) are not stored in this repo; keep
+# them out of history. Transfer them separately and verify with the .sha256 files.
 *-airgap.tar.gz
+*.part_*
+*.tar.zip.[0-9]*
+*.tar.gz.z[0-9]*
+*.tar.gz.zip
