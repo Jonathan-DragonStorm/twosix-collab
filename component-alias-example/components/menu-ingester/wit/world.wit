@@ -1,0 +1,10 @@
+package tst:menu-ingester@0.1.0;
+
+// Built together with bytecodealliance:pkg/wasip2 (see componentize-go.toml),
+// which supplies the WASI P2 HTTP entrypoint that go.bytecodealliance.org/pkg
+// /wasihttp implements.
+world menu-ingester {
+  // Filled by whichever Workload component is named `downstream`: meal-gen
+  // in the base menu Workload, menu-persister in the meal menu Workloads.
+  import downstream: tst:menu/stage@0.1.0;
+}

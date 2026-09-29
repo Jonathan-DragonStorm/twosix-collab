@@ -1,0 +1,5 @@
+package tst:menu-distributor@0.1.0;
+
+world menu-distributor {
+  export tst:menu/stage@0.1.0;
+}

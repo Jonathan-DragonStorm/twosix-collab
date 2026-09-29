@@ -1,0 +1,24 @@
+// The one shared role interface for every menu pipeline stage.
+//
+// Components never import a *peer's* interface. An upstream stage imports
+// `stage` under a role label (`import downstream: stage`), and the Workload
+// decides which component fills that label by giving it the same `name`.
+package tst:menu@0.1.0;
+
+interface types {
+  record menu-item {
+    name: string,
+    meal: string,
+    description: option<string>,
+    ingredients: list<string>,
+    // Components that handled this item, in order. Lets a caller see the
+    // pipeline topology the Workload wired up.
+    trace: list<string>,
+  }
+}
+
+interface stage {
+  use types.{menu-item};
+
+  process: func(items: list<menu-item>) -> result<list<menu-item>, string>;
+}

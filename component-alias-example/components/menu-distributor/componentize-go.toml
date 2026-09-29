@@ -1,0 +1,2 @@
+worlds = ["tst:menu-distributor/menu-distributor@0.1.0"]
+wit_paths = ["wit"]

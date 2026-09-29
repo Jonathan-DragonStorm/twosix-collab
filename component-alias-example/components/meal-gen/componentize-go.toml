@@ -1,0 +1,2 @@
+worlds = ["tst:meal-gen/meal-gen@0.1.0"]
+wit_paths = ["wit"]

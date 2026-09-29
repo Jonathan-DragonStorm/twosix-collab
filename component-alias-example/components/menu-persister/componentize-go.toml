@@ -1,0 +1,2 @@
+worlds = ["tst:menu-persister/menu-persister@0.1.0"]
+wit_paths = ["wit"]

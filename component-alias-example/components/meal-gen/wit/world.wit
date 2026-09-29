@@ -1,0 +1,7 @@
+package tst:meal-gen@0.1.0;
+
+world meal-gen {
+  // Filled by whichever Workload component is named `enriched`.
+  import enriched: tst:menu/stage@0.1.0;
+  export tst:menu/stage@0.1.0;
+}

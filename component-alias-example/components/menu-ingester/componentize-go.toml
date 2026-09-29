@@ -1,0 +1,2 @@
+worlds = ["tst:menu-ingester/menu-ingester@0.1.0", "bytecodealliance:pkg/wasip2@0.1.0"]
+wit_paths = ["wit"]

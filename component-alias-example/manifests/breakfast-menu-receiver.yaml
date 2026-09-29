@@ -1,0 +1,33 @@
+# Breakfast Menu Receiver: ingester -> persister -> distributor
+#
+# Same component artifacts as base-menu-receiver.yaml, no meal-gen. The
+# persister takes the `downstream` role directly, so removing a stage is a
+# Workload change only.
+apiVersion: control.cosmonic.io/v1alpha1
+kind: HTTPTrigger
+metadata:
+  name: breakfast-menu-receiver
+  namespace: twosix-dev
+spec:
+  replicas: 1
+  ingress:
+    host: breakfast-menu.localhost.cosmonic.sh
+    paths:
+      - path: /
+        pathType: Prefix
+  template:
+    spec:
+      hostSelector:
+        hostgroup: default
+      components:
+        - name: ingester
+          image: registry.twosix-dev.svc.cluster.local/library/menu-ingester:0.1.0
+          imagePullPolicy: IfNotPresent
+        # No meal-gen: fills menu-ingester's `import downstream: tst:menu/stage`
+        - name: downstream
+          image: registry.twosix-dev.svc.cluster.local/library/menu-persister:0.1.0
+          imagePullPolicy: IfNotPresent
+        # Fills menu-persister's `import distribute: tst:menu/stage`
+        - name: distribute
+          image: registry.twosix-dev.svc.cluster.local/library/menu-distributor:0.1.0
+          imagePullPolicy: IfNotPresent

@@ -1,0 +1,7 @@
+package tst:menu-persister@0.1.0;
+
+world menu-persister {
+  // Filled by whichever Workload component is named `distribute`.
+  import distribute: tst:menu/stage@0.1.0;
+  export tst:menu/stage@0.1.0;
+}

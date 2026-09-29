@@ -1,0 +1,39 @@
+# Base Menu Receiver: ingester -> meal-gen -> persister -> distributor
+#
+# Each component's `name` is the (implements ..) label another component
+# imports it under, so the Workload -- not the component -- picks the peer.
+# meal-gen and menu-persister both export tst:menu/stage; the labels say which
+# one each importer gets.
+apiVersion: control.cosmonic.io/v1alpha1
+kind: HTTPTrigger
+metadata:
+  name: base-menu-receiver
+  namespace: twosix-dev
+spec:
+  replicas: 1
+  ingress:
+    host: base-menu.localhost.cosmonic.sh
+    paths:
+      - path: /
+        pathType: Prefix
+  template:
+    spec:
+      hostSelector:
+        hostgroup: default
+      components:
+        # Exports wasi:http, so it is the ingress entrypoint.
+        - name: ingester
+          image: registry.twosix-dev.svc.cluster.local/library/menu-ingester:0.1.0
+          imagePullPolicy: IfNotPresent
+        # Fills menu-ingester's `import downstream: tst:menu/stage`
+        - name: downstream
+          image: registry.twosix-dev.svc.cluster.local/library/meal-gen:0.1.0
+          imagePullPolicy: IfNotPresent
+        # Fills meal-gen's `import enriched: tst:menu/stage`
+        - name: enriched
+          image: registry.twosix-dev.svc.cluster.local/library/menu-persister:0.1.0
+          imagePullPolicy: IfNotPresent
+        # Fills menu-persister's `import distribute: tst:menu/stage`
+        - name: distribute
+          image: registry.twosix-dev.svc.cluster.local/library/menu-distributor:0.1.0
+          imagePullPolicy: IfNotPresent
